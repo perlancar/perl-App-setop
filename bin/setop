@@ -198,20 +198,6 @@ Shortcut for C<--op symdiff>.
 99 on command-line options error.
 
 
-=head1 FAQ
-
-=head2 How do I append lines to a file only if they do not exist in the file?
-
-You cannot do this with C<uniq>:
-
- % ( cat FILE ; produce-lines ) | uniq - FILE
- % ( cat FILE ; produce-lines ) | uniq >> FILE
-
-as it will clobber the file first. But you can do this with C<nauniq>:
-
- % produce-lines | nauniq -a - FILE
-
-
 =head1 TODO
 
 =over
@@ -233,7 +219,5 @@ options a bit, now preserves order of lines.
 
 
 =head1 SEE ALSO
-
-L<uniq>
 
 =cut
