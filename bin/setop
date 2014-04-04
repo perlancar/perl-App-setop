@@ -1,0 +1,239 @@
+#!/usr/bin/perl
+
+use 5.010001;
+use strict;
+use warnings;
+
+use Getopt::Long;
+
+# VERSION
+
+my %Opts = (
+    op          => undef,
+    #ignore_case => 0,
+);
+
+sub parse_cmdline {
+    my $res = GetOptions(
+        #'ignore-case|i' => \$Opts{ignore_case},
+        'op=s'          => \$Opts{op},
+        'union'         => sub { $Opts{op} = 'union' },
+        # reserve -i for ignore_case
+        'intersect'     => sub { $Opts{op} = 'intersect' },
+        'diff'          => sub { $Opts{op} = 'diff' },
+        'symdiff'       => sub { $Opts{op} = 'symdiff' },
+        'help|h'           => sub {
+            print <<USAGE;
+Usage:
+  setop [OPTIONS]... FILE FILE ...
+  setop --help
+Options:
+  --op=s
+  --union (shortcut for --op=union)
+  --intersect (shortcut for --op=intersect)
+  --diff (shortcut for --op=diff)
+  --symdiff (shortcut for --op=symdiff)
+For more details, see the manpage/documentation.
+USAGE
+            exit 0;
+        },
+    );
+    exit 99 if !$res;
+    if (!$Opts{op}) {
+        warn "Please specify an operation (--op)\n"; exit 99;
+    }
+    if ($Opts{op} !~ /\A(union|intersect|diff|symdiff)\z/) {
+        warn "Unknown op, please see --help for known operations\n"; exit 99;
+    }
+    unless (@ARGV >= 1) {
+        warn "Please specify at least 1 input files\n";
+        exit 99;
+    }
+}
+
+sub run {
+    require Tie::IxHash;
+
+    tie my(%res), 'Tie::IxHash';
+
+    my $op = $Opts{op};
+
+    my $i = 0;
+    my $stdin_specified;
+  FILE:
+    for my $i (1..@ARGV) {
+        my $fh;
+        my $fname = $ARGV[$i-1];
+        if ($fname eq '-') {
+            do { warn "Can't use STDIN twice\n"; exit 99 }
+                if $stdin_specified++;
+            $fh = *STDIN;
+        } else {
+            open $fh, "<", $fname or die "Can't open input file $fname: $!\n";
+        }
+        if ($op eq 'union') {
+
+            while (<$fh>) { $res{$_}++ }
+
+            # print result
+            if ($i == @ARGV) {
+                print for keys %res;
+            }
+
+        } elsif ($op eq 'intersect') {
+
+            if ($i == 1) {
+                while (<$fh>) { $res{$_} = 1 }
+            } else {
+                while (<$fh>) {
+                    if ($res{$_} && $res{$_} == $i-1) {
+                        $res{$_}++;
+                    }
+                }
+            }
+
+            # print result
+            if ($i == @ARGV) {
+                for (keys %res) {
+                    print if $res{$_} == $i;
+                }
+            }
+
+        } elsif ($op eq 'diff') {
+
+            if ($i == 1) {
+                while (<$fh>) { $res{$_}++ }
+            } else {
+                while (<$fh>) {
+                    delete $res{$_};
+                }
+            }
+
+            # print result
+            if ($i == @ARGV) {
+                print for keys %res;
+            }
+
+        } elsif ($op eq 'symdiff') {
+
+            if ($i == 1) {
+                while (<$fh>) { $res{$_} = 1 }
+            } else {
+                while (<$fh>) {
+                    if (!$res{$_} || $res{$_} <= 2) {
+                        $res{$_}++;
+                    }
+                }
+            }
+
+            # print result
+            if ($i == @ARGV) {
+                for (keys %res) {
+                    print if $res{$_} == 1;
+                }
+            }
+
+        }
+
+    }
+
+}
+
+# MAIN
+
+parse_cmdline();
+run();
+
+1;
+# ABSTRACT: Set operations (union, intersection, difference) on lines of files
+# PODNAME: setop
+
+=head1 SYNOPSIS
+
+ setop [OPTION]... FILE FILE ...
+
+
+=head1 DESCRIPTION
+
+C<setop> treats files as a sets of lines, and performs operations between the
+sets.
+
+=head1 OPTIONS
+
+=over
+
+=item * --op=S
+
+Pick operation. Known operations are: B<union> (return lines from the first file
+and others, duplicate removed, order preserved), B<intersect> (return common
+lines found in every file, order preserved), C<diff> (return lines found in the
+first file but not the second), C<symdiff> (short for "symetric difference",
+return lines found in either file but not both).
+
+=item * --union
+
+Shortcut for C<--op union>.
+
+=item * --intersect
+
+Shortcut for C<--op intersect>.
+
+=item * --diff
+
+Shortcut for C<--op diff>.
+
+=item * --symdiff
+
+Shortcut for C<--op symdiff>.
+
+=back
+
+
+=head1 EXIT CODES
+
+0 on success.
+
+255 on I/O error.
+
+99 on command-line options error.
+
+
+=head1 FAQ
+
+=head2 How do I append lines to a file only if they do not exist in the file?
+
+You cannot do this with C<uniq>:
+
+ % ( cat FILE ; produce-lines ) | uniq - FILE
+ % ( cat FILE ; produce-lines ) | uniq >> FILE
+
+as it will clobber the file first. But you can do this with C<nauniq>:
+
+ % produce-lines | nauniq -a - FILE
+
+
+=head1 TODO
+
+=over
+
+=item * --ignore-case, -i
+
+=item * --record-separator
+
+=back
+
+
+=head1 HISTORY
+
+I first wrote C<fileop> in Ruby in 2003, since Ruby has nice C<+> and C<->
+operators for arrays.
+
+Rewrote in Perl in 2014. Script renamed to C<setop>, changed command-line
+options a bit, now preserves order of lines.
+
+
+=head1 SEE ALSO
+
+L<uniq>
+
+=cut
