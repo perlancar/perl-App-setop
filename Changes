@@ -1,5 +1,12 @@
 Revision history for App-setop
 
+0.03    2014-04-06 (SHARYANTO)
+
+        - No functional changes.
+
+        - [dist] Specify minimum version of IPC::Cmd that has run_forked() [CT].
+
+
 0.02    2014-04-04 (SHARYANTO)
 
         - No functional changes.
