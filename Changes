@@ -1,5 +1,12 @@
 Revision history for App-setop
 
+0.04    2014-05-17 (SHARYANTO)
+
+        - No functional changes.
+
+        - Replace File::Slurp with File::Slurp::Tiny.
+
+
 0.03    2014-04-06 (SHARYANTO)
 
         - No functional changes.
