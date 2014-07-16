@@ -167,8 +167,9 @@ sets.
 Pick operation. Known operations are: B<union> (return lines from the first file
 and others, duplicate removed, order preserved), B<intersect> (return common
 lines found in every file, order preserved), C<diff> (return lines found in the
-first file but not the second), C<symdiff> (short for "symetric difference",
-return lines found in either file but not both).
+first file but not the second, duplicate removed, order preserved), C<symdiff>
+(short for "symetric difference", return lines found in either file but not
+both, duplicate removed, order preserved).
 
 =item * --union
 
