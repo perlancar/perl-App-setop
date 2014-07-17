@@ -27,6 +27,8 @@ $CWD = $tmpdir;
 write_file("f1", lines(1, 3, 2, 3));
 write_file("f2", lines(2, 3, 4, 1, 1));
 write_file("f3", lines(3, 4, 3, 5));
+write_file("f1a", lines(qw/A b C c d/));
+write_file("f2a", lines(qw/b a E/));
 
 subtest "no operation -> error" => sub {
     test_setop(
@@ -76,6 +78,11 @@ subtest "union" => sub {
         args    => [qw/--op union f1 f2 f3/],
         output  => lines(1, 3, 2, 4, 5),
     );
+    test_setop(
+        name    => 'ignore case',
+        args    => [qw/-i --op union f1a f2a/],
+        output  => lines(qw/A b C d E/),
+    );
 };
 
 subtest "intersect" => sub {
@@ -102,8 +109,9 @@ subtest "intersect" => sub {
         output  => lines(3, 4),
     );
     test_setop(
-        args    => [qw/-i f1 f2 f3/],
-        output  => lines(3),
+        name    => 'ignore case',
+        args    => [qw/-i --intersect f1a f2a/],
+        output  => lines(qw/A b/),
     );
 };
 
@@ -130,6 +138,11 @@ subtest "diff" => sub {
         args    => [qw/--op diff - f1 f2 f3/],
         input   => lines(6, 1, 0, 2, 3),
         output  => lines(6, 0),
+    );
+    test_setop(
+        name    => 'ignore case',
+        args    => [qw/-i --diff f1a f2a/],
+        output  => lines(qw/C d/),
     );
 };
 
@@ -161,6 +174,10 @@ subtest "symdiff" => sub {
         args    => [qw/--op symdiff f3 f2 f1 -/],
         input   => lines(6, 1, 0, 2, 3),
         output  => lines(5, 6, 0),
+    );
+    test_setop(
+        args    => [qw/-i --symdiff f1a f2a/],
+        output  => lines(qw/C d E/),
     );
 };
 

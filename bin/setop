@@ -10,15 +10,14 @@ use Getopt::Long;
 
 my %Opts = (
     op          => undef,
-    #ignore_case => 0,
+    ignore_case => 0,
 );
 
 sub parse_cmdline {
     my $res = GetOptions(
-        #'ignore-case|i' => \$Opts{ignore_case},
+        'ignore-case|i' => \$Opts{ignore_case},
         'op=s'          => \$Opts{op},
         'union'         => sub { $Opts{op} = 'union' },
-        # reserve -i for ignore_case
         'intersect'     => sub { $Opts{op} = 'intersect' },
         'diff'          => sub { $Opts{op} = 'diff' },
         'symdiff'       => sub { $Opts{op} = 'symdiff' },
@@ -28,6 +27,7 @@ Usage:
   setop [OPTIONS]... FILE FILE ...
   setop --help
 Options:
+  --ignore-case, -i
   --op=s
   --union (shortcut for --op=union)
   --intersect (shortcut for --op=intersect)
@@ -57,6 +57,7 @@ sub run {
     tie my(%res), 'Tie::IxHash';
 
     my $op = $Opts{op};
+    my $ic = $Opts{ignore_case};
 
     my $i = 0;
     my $stdin_specified;
@@ -73,63 +74,137 @@ sub run {
         }
         if ($op eq 'union') {
 
-            while (<$fh>) { $res{$_}++ }
+            if ($ic) {
+                while (<$fh>) {
+                    my $k = lc $_;
+                    $res{$k} = $_ unless exists $res{$k};
+                }
 
-            # print result
-            if ($i == @ARGV) {
-                print for keys %res;
+                # print result
+                if ($i == @ARGV) {
+                    print $res{$_} for keys %res;
+                }
+            } else {
+                while (<$fh>) { $res{$_}++ }
+
+                # print result
+                if ($i == @ARGV) {
+                    print for keys %res;
+                }
             }
 
         } elsif ($op eq 'intersect') {
 
-            if ($i == 1) {
-                while (<$fh>) { $res{$_} = 1 }
+            if ($ic) {
+                if ($i == 1) {
+                    while (<$fh>) {
+                        my $k = lc $_;
+                        $res{$k} = [1,$_] unless exists $res{$k};
+                    }
+                } else {
+                    while (<$fh>) {
+                        my $k = lc $_;
+                        if ($res{$k} && $res{$k}[0] == $i-1) {
+                            $res{$k}[0]++;
+                        }
+                    }
+                }
+                # print result
+                if ($i == @ARGV) {
+                    for (keys %res) {
+                        print $res{$_}[1] if $res{$_}[0] == $i;
+                    }
+                }
             } else {
-                while (<$fh>) {
-                    if ($res{$_} && $res{$_} == $i-1) {
-                        $res{$_}++;
+                if ($i == 1) {
+                    while (<$fh>) { $res{$_} = 1 }
+                } else {
+                    while (<$fh>) {
+                        if ($res{$_} && $res{$_} == $i-1) {
+                            $res{$_}++;
+                        }
+                    }
+                }
+                # print result
+                if ($i == @ARGV) {
+                    for (keys %res) {
+                        print if $res{$_} == $i;
                     }
                 }
             }
 
-            # print result
-            if ($i == @ARGV) {
-                for (keys %res) {
-                    print if $res{$_} == $i;
-                }
-            }
 
         } elsif ($op eq 'diff') {
 
-            if ($i == 1) {
-                while (<$fh>) { $res{$_}++ }
-            } else {
-                while (<$fh>) {
-                    delete $res{$_};
+            if ($ic) {
+                if ($i == 1) {
+                    while (<$fh>) {
+                        my $k = lc $_;
+                        $res{$k} = $_ unless exists $res{$k};
+                    }
+                } else {
+                    while (<$fh>) {
+                        my $k = lc $_;
+                        delete $res{$k};
+                    }
                 }
-            }
-
-            # print result
-            if ($i == @ARGV) {
-                print for keys %res;
+                # print result
+                if ($i == @ARGV) {
+                    print $res{$_} for keys %res;
+                }
+            } else {
+                if ($i == 1) {
+                    while (<$fh>) { $res{$_}++ }
+                } else {
+                    while (<$fh>) {
+                        delete $res{$_};
+                    }
+                }
+                # print result
+                if ($i == @ARGV) {
+                    print for keys %res;
+                }
             }
 
         } elsif ($op eq 'symdiff') {
 
-            if ($i == 1) {
-                while (<$fh>) { $res{$_} = 1 }
-            } else {
-                while (<$fh>) {
-                    if (!$res{$_} || $res{$_} <= 2) {
-                        $res{$_}++;
+            if ($ic) {
+                if ($i == 1) {
+                    while (<$fh>) {
+                        my $k = lc $_;
+                        $res{$k} = [1,$_] unless exists $res{$k};
+                    }
+                } else {
+                    while (<$fh>) {
+                        my $k = lc $_;
+                        if (!$res{$k}) {
+                            $res{$k} = [1, $_];
+                        } elsif ($res{$k}[0] <= 2) {
+                            $res{$k}[0]++;
+                        }
                     }
                 }
-            }
-
-            # print result
-            if ($i == @ARGV) {
-                for (keys %res) {
-                    print if $res{$_} == 1;
+                # print result
+                if ($i == @ARGV) {
+                    for (keys %res) {
+                        print $res{$_}[1] if $res{$_}[0] == 1;
+                    }
+                }
+            } else {
+                if ($i == 1) {
+                    while (<$fh>) { $res{$_} = 1 }
+                } else {
+                    while (<$fh>) {
+                        if (!$res{$_} || $res{$_} <= 2) {
+                            $res{$_}++;
+                        }
+                    }
+                }
+                # print result
+                if ($i == @ARGV) {
+                    for (keys %res) {
+                        print if $res{$_} == 1;
+                    }
                 }
             }
 
