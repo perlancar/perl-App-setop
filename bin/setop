@@ -1,12 +1,13 @@
 #!perl
 
+# DATE
+# VERSION
+
 use 5.010001;
 use strict;
 use warnings;
 
 use Getopt::Long;
-
-# VERSION
 
 my %Opts = (
     op          => undef,
@@ -23,7 +24,12 @@ sub parse_cmdline {
         'intersect'     => sub { $Opts{op} = 'intersect' },
         'diff'          => sub { $Opts{op} = 'diff' },
         'symdiff'       => sub { $Opts{op} = 'symdiff' },
-        'help|h'           => sub {
+        'version|v'     => sub {
+            no warnings;
+            say "setop version $main::VERSION ($main::DATE)";
+            exit 0;
+        },
+        'help|h'        => sub {
             print <<USAGE;
 Usage:
   setop [OPTIONS]... FILE FILE ...
@@ -249,6 +255,14 @@ sets.
 
 =over
 
+=item * --help, -h
+
+Show help message and exit.
+
+=item * --version, -v
+
+Show version and exit.
+
 =item * --op=S
 
 Pick operation. Known operations are: B<union> (return lines from the first file
@@ -274,6 +288,10 @@ Shortcut for C<--op diff>.
 
 Shortcut for C<--op symdiff>.
 
+=item * --ignore-case, -i
+
+=item * --ignore-all-space, -w
+
 =back
 
 
@@ -289,8 +307,6 @@ Shortcut for C<--op symdiff>.
 =head1 TODO
 
 =over
-
-=item * --ignore-case, -i
 
 =item * --record-separator
 
