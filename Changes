@@ -1,5 +1,14 @@
 Revision history for App-setop
 
+0.06    2014-07-17 (SHARYANTO)
+
+        - Add option: --ignore-case, -i
+
+        - Add option: --ignore-all-space, -w
+
+        - Add option: --version, -v
+
+
 0.05    2014-07-16 (SHARYANTO)
 
         - No functional changes.
