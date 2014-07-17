@@ -238,7 +238,7 @@ parse_cmdline();
 run();
 
 1;
-# ABSTRACT: Set operations (union, intersection, difference) on lines of files
+# ABSTRACT: Set operations (union, intersection, difference, symmetric diff) on lines of files
 # PODNAME: setop
 
 =head1 SYNOPSIS
@@ -267,8 +267,8 @@ Show version and exit.
 
 Pick operation. Known operations are: B<union> (return lines from the first file
 and others, duplicate removed, order preserved), B<intersect> (return common
-lines found in every file, order preserved), C<diff> (return lines found in the
-first file but not the second, duplicate removed, order preserved), C<symdiff>
+lines found in every file, order preserved), B<diff> (return lines found in the
+first file but not the second, duplicate removed, order preserved), B<symdiff>
 (short for "symetric difference", return lines found in either file but not
 both, duplicate removed, order preserved).
 
