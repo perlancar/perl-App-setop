@@ -29,6 +29,8 @@ write_file("f2", lines(2, 3, 4, 1, 1));
 write_file("f3", lines(3, 4, 3, 5));
 write_file("f1a", lines(qw/A b C c d/));
 write_file("f2a", lines(qw/b a E/));
+write_file("f1s", lines("1 ", 2, "3 ", 3, 4));
+write_file("f2s", lines(2, 1, "5 "));
 
 subtest "no operation -> error" => sub {
     test_setop(
@@ -80,8 +82,13 @@ subtest "union" => sub {
     );
     test_setop(
         name    => 'ignore case',
-        args    => [qw/-i --op union f1a f2a/],
+        args    => [qw/-i --union f1a f2a/],
         output  => lines(qw/A b C d E/),
+    );
+    test_setop(
+        name    => 'ignore all space',
+        args    => [qw/-w --union f1s f2s/],
+        output  => lines("1 ", 2, "3 ", 4, "5 "),
     );
 };
 
@@ -113,6 +120,11 @@ subtest "intersect" => sub {
         args    => [qw/-i --intersect f1a f2a/],
         output  => lines(qw/A b/),
     );
+    test_setop(
+        name    => 'ignore all space',
+        args    => [qw/-w --intersect f1s f2s/],
+        output  => lines("1 ", 2),
+    );
 };
 
 subtest "diff" => sub {
@@ -143,6 +155,11 @@ subtest "diff" => sub {
         name    => 'ignore case',
         args    => [qw/-i --diff f1a f2a/],
         output  => lines(qw/C d/),
+    );
+    test_setop(
+        name    => 'ignore all space',
+        args    => [qw/-w --diff f1s f2s/],
+        output  => lines("3 ", 4),
     );
 };
 
@@ -178,6 +195,10 @@ subtest "symdiff" => sub {
     test_setop(
         args    => [qw/-i --symdiff f1a f2a/],
         output  => lines(qw/C d E/),
+    );
+    test_setop(
+        args    => [qw/-w --symdiff f1s f2s/],
+        output  => lines("3 ", 4, "5 "),
     );
 };
 

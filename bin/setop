@@ -11,11 +11,13 @@ use Getopt::Long;
 my %Opts = (
     op          => undef,
     ignore_case => 0,
+    ignore_all_space => 0,
 );
 
 sub parse_cmdline {
     my $res = GetOptions(
-        'ignore-case|i' => \$Opts{ignore_case},
+        'ignore-case|i'      => \$Opts{ignore_case},
+        'ignore-all-space|w' => \$Opts{ignore_all_space},
         'op=s'          => \$Opts{op},
         'union'         => sub { $Opts{op} = 'union' },
         'intersect'     => sub { $Opts{op} = 'intersect' },
@@ -28,6 +30,7 @@ Usage:
   setop --help
 Options:
   --ignore-case, -i
+  --ignore-all-space, -w
   --op=s
   --union (shortcut for --op=union)
   --intersect (shortcut for --op=intersect)
@@ -56,8 +59,10 @@ sub run {
 
     tie my(%res), 'Tie::IxHash';
 
-    my $op = $Opts{op};
-    my $ic = $Opts{ignore_case};
+    my $op  = $Opts{op};
+    my $ic  = $Opts{ignore_case};
+    my $ias = $Opts{ignore_all_space};
+    my $ign = $ic || $ias;
 
     my $i = 0;
     my $stdin_specified;
@@ -74,9 +79,10 @@ sub run {
         }
         if ($op eq 'union') {
 
-            if ($ic) {
+            if ($ign) {
                 while (<$fh>) {
-                    my $k = lc $_;
+                    my $k = $ic ? lc($_) : $_;
+                    $k =~ s/\s+//g if $ias;
                     $res{$k} = $_ unless exists $res{$k};
                 }
 
@@ -95,15 +101,17 @@ sub run {
 
         } elsif ($op eq 'intersect') {
 
-            if ($ic) {
+            if ($ign) {
                 if ($i == 1) {
                     while (<$fh>) {
-                        my $k = lc $_;
+                        my $k = $ic ? lc($_) : $_;
+                        $k =~ s/\s+//g if $ias;
                         $res{$k} = [1,$_] unless exists $res{$k};
                     }
                 } else {
                     while (<$fh>) {
-                        my $k = lc $_;
+                        my $k = $ic ? lc($_) : $_;
+                        $k =~ s/\s+//g if $ias;
                         if ($res{$k} && $res{$k}[0] == $i-1) {
                             $res{$k}[0]++;
                         }
@@ -136,15 +144,17 @@ sub run {
 
         } elsif ($op eq 'diff') {
 
-            if ($ic) {
+            if ($ign) {
                 if ($i == 1) {
                     while (<$fh>) {
-                        my $k = lc $_;
+                        my $k = $ic ? lc($_) : $_;
+                        $k =~ s/\s+//g if $ias;
                         $res{$k} = $_ unless exists $res{$k};
                     }
                 } else {
                     while (<$fh>) {
-                        my $k = lc $_;
+                        my $k = $ic ? lc($_) : $_;
+                        $k =~ s/\s+//g if $ias;
                         delete $res{$k};
                     }
                 }
@@ -168,15 +178,17 @@ sub run {
 
         } elsif ($op eq 'symdiff') {
 
-            if ($ic) {
+            if ($ign) {
                 if ($i == 1) {
                     while (<$fh>) {
-                        my $k = lc $_;
+                        my $k = $ic ? lc($_) : $_;
+                        $k =~ s/\s+//g if $ias;
                         $res{$k} = [1,$_] unless exists $res{$k};
                     }
                 } else {
                     while (<$fh>) {
-                        my $k = lc $_;
+                        my $k = $ic ? lc($_) : $_;
+                        $k =~ s/\s+//g if $ias;
                         if (!$res{$k}) {
                             $res{$k} = [1, $_];
                         } elsif ($res{$k}[0] <= 2) {
