@@ -3,7 +3,7 @@ package App::setop;
 # VERSION
 
 1;
-# ABSTRACT: Set operations (union, intersection, difference) on lines of files
+# ABSTRACT: Set operations (union, intersection, difference, symmetric diff) on lines of files
 
 =head1 SYNOPSIS
 
