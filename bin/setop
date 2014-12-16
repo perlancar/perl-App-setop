@@ -239,7 +239,7 @@ run();
 
 1;
 # ABSTRACT: Set operations (union, intersection, difference, symmetric diff) on lines of files
-# PODNAME: setop
+# PODNAME:
 
 =head1 SYNOPSIS
 
