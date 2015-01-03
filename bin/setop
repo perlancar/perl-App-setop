@@ -304,15 +304,6 @@ Shortcut for C<--op symdiff>.
 99 on command-line options error.
 
 
-=head1 TODO
-
-=over
-
-=item * --record-separator
-
-=back
-
-
 =head1 HISTORY
 
 I first wrote C<fileop> in Ruby in 2003, since Ruby has nice C<+> and C<->
