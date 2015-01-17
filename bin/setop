@@ -245,6 +245,12 @@ run();
 
  setop [OPTION]... FILE FILE ...
 
+Examples:
+
+ % setop --union file1 file2 file3 ;# combine files, duplicates removed, order preserved
+ % setop --intersect file1 file2 file3; # show lines common in all three files
+ % setop --diff <(ls /path1) <(ls /path2) ;# show files in /path1 not in /path2
+
 
 =head1 DESCRIPTION
 
