@@ -9,4 +9,11 @@ package App::setop;
 
 See the command-line script L<setop>.
 
+
+=head1 SEE ALSO
+
+L<Array::Utils>
+
+L<Set::Scalar>
+
 =cut
