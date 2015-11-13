@@ -1,5 +1,14 @@
 Revision history for App-setop
 
+0.10    2015-11-13 (PERLANCAR)
+
+	- No functional changes.
+
+	- [doc] Fix typos/wording.
+
+	- [doc] Mention Array::Utils & Set::Scalar.
+
+
 0.09    2015-01-17 (PERLANCAR)
 
 	- No functional changes.
