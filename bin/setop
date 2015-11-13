@@ -247,9 +247,9 @@ run();
 
 Examples:
 
- % setop --union file1 file2 file3 ;# combine files, duplicates removed, order preserved
+ % setop --union file1 file2 file3 ;# combine files, duplicate lines removed, order preserved
  % setop --intersect file1 file2 file3; # show lines common in all three files
- % setop --diff <(ls /path1) <(ls /path2) ;# show files in /path1 not in /path2
+ % setop --diff <(ls /path1) <(ls /path2) ;# show lines in /path1 not in /path2
 
 
 =head1 DESCRIPTION
@@ -272,11 +272,12 @@ Show version and exit.
 =item * --op=S
 
 Pick operation. Known operations are: B<union> (return lines from the first file
-and others, duplicate removed, order preserved), B<intersect> (return common
-lines found in every file, order preserved), B<diff> (return lines found in the
-first file but not the second, duplicate removed, order preserved), B<symdiff>
-(short for "symetric difference", return lines found in either file but not
-both, duplicate removed, order preserved).
+and others, duplicate lines removed [even duplicates from the same file], order
+preserved), B<intersect> (return common lines found in every file, order
+preserved), B<diff> (return lines found in the first file but not the second,
+duplicate removed, order preserved), B<symdiff> (short for "symetric
+difference", return lines found in either file but not both, duplicate removed,
+order preserved).
 
 =item * --union
 
