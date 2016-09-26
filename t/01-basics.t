@@ -6,7 +6,7 @@ use warnings;
 use FindBin;
 
 use File::chdir;
-use File::Slurp::Tiny qw(write_file);
+use File::Slurper qw(write_text);
 use File::Temp qw(tempdir);
 use IPC::Cmd qw(run_forked);
 use String::ShellQuote;
@@ -24,13 +24,13 @@ sub lines { join("", map {"$_\n"} @_) }
 my ($tmpdir) = tempdir(CLEANUP => 1);
 $CWD = $tmpdir;
 
-write_file("f1", lines(1, 3, 2, 3));
-write_file("f2", lines(2, 3, 4, 1, 1));
-write_file("f3", lines(3, 4, 3, 5));
-write_file("f1a", lines(qw/A b C c d/));
-write_file("f2a", lines(qw/b a E/));
-write_file("f1s", lines("1 ", 2, "3 ", 3, 4));
-write_file("f2s", lines(2, 1, "5 "));
+write_text("f1", lines(1, 3, 2, 3));
+write_text("f2", lines(2, 3, 4, 1, 1));
+write_text("f3", lines(3, 4, 3, 5));
+write_text("f1a", lines(qw/A b C c d/));
+write_text("f2a", lines(qw/b a E/));
+write_text("f1s", lines("1 ", 2, "3 ", 3, 4));
+write_text("f2s", lines(2, 1, "5 "));
 
 subtest "no operation -> error" => sub {
     test_setop(
