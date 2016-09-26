@@ -10,9 +10,10 @@ use warnings;
 use Getopt::Long;
 
 my %Opts = (
-    op          => undef,
+    op => undef,
     ignore_case => 0,
     ignore_all_space => 0,
+    glue => ',',
 );
 
 sub parse_cmdline {
@@ -24,6 +25,8 @@ sub parse_cmdline {
         'intersect'     => sub { $Opts{op} = 'intersect' },
         'diff'          => sub { $Opts{op} = 'diff' },
         'symdiff'       => sub { $Opts{op} = 'symdiff' },
+        'cross'         => sub { $Opts{op} = 'cross' },
+        'glue=s'        => \$Opts{glue},
         'version|v'     => sub {
             no warnings;
             say "setop version $main::VERSION ($main::DATE)";
@@ -51,11 +54,15 @@ USAGE
     if (!$Opts{op}) {
         warn "Please specify an operation (--op)\n"; exit 99;
     }
-    if ($Opts{op} !~ /\A(union|intersect|diff|symdiff)\z/) {
+    if ($Opts{op} !~ /\A(union|intersect|diff|symdiff|cross)\z/) {
         warn "Unknown op, please see --help for known operations\n"; exit 99;
     }
+    unless ($Opts{op} ne 'cross' || @ARGV > 1) {
+        warn "Please specify at least 2 input files\n";
+        exit 99;
+    }
     unless (@ARGV >= 1) {
-        warn "Please specify at least 1 input files\n";
+        warn "Please specify at least 1 input file\n";
         exit 99;
     }
 }
@@ -69,6 +76,8 @@ sub run {
     my $ic  = $Opts{ignore_case};
     my $ias = $Opts{ignore_all_space};
     my $ign = $ic || $ias;
+
+    my @aoaos;
 
     my $i = 0;
     my $stdin_specified;
@@ -226,6 +235,24 @@ sub run {
                 }
             }
 
+        } elsif ($op eq 'cross') {
+
+            my $aos = [];
+            while (<$fh>) {
+                chomp;
+                push @$aos, $_;
+            }
+            push @aoaos, $aos;
+            # print result
+            if ($i == @ARGV) {
+                require Set::CrossProduct;
+                my $iter = Set::CrossProduct->new(\@aoaos);
+                my $glue = $Opts{glue};
+                while (my $tuple = $iter->get) {
+                    print join($glue, @$tuple), "\n";
+                }
+            }
+
         }
 
     }
@@ -277,7 +304,8 @@ preserved), B<intersect> (return common lines found in every file, order
 preserved), B<diff> (return lines found in the first file but not the second,
 duplicate removed, order preserved), B<symdiff> (short for "symetric
 difference", return lines found in either file but not both, duplicate removed,
-order preserved).
+order preserved), B<cross> (short for "cross product", produce cross product
+from lines from each file).
 
 =item * --union
 
@@ -295,9 +323,17 @@ Shortcut for C<--op diff>.
 
 Shortcut for C<--op symdiff>.
 
+=item * --cross
+
+Shortcut for C<--op cross>.
+
 =item * --ignore-case, -i
 
 =item * --ignore-all-space, -w
+
+=item * --glue=s
+
+Glue character to use to combine lines when operation is B<cross>.
 
 =back
 
