@@ -45,6 +45,7 @@ Options:
   --intersect (shortcut for --op=intersect)
   --diff (shortcut for --op=diff)
   --symdiff (shortcut for --op=symdiff)
+  --cross (shortcut for --op=cross)
 For more details, see the manpage/documentation.
 USAGE
             exit 0;
