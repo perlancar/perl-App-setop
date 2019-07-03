@@ -1,6 +1,18 @@
+0.122   2019-07-03  Released-By: PERLANCAR
+
+	- No functional changes.
+
+        - Edit Changes.
+
+
 0.121   2019-07-03  Released-By: PERLANCAR
 
 	- diff: Add --check-chars & --skip-chars option.
+
+        - [bugfix] diff: When -i or -w is given, setop used to eliminate lines
+          from the first file, e.g. if file contains "A" and "a", then the
+          result will only contain "A" (if it's not found in subsequent files).
+          Now both "A" and "a" are preserved.
 
 
 0.120   2019-04-24  Released-By: PERLANCAR
