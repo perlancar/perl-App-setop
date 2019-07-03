@@ -1,3 +1,8 @@
+0.121   2019-07-03  Released-By: PERLANCAR
+
+	- diff: Add --check-chars & --skip-chars option.
+
+
 0.120   2019-04-24  Released-By: PERLANCAR
 
 	- No functional changes.
